@@ -1,0 +1,9 @@
+author = Duze
+version = 1.0.3.1
+displayName = Build Mate
+homepage = https://forums.terraria.org/index.php?threads/build-mate-in-game-mapping-tools-is-multiplayer.67017/
+hideCode = false
+hideResources = false
+includeSource = false
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*, .vscode\*
+includePDB = true

@@ -1,0 +1,8 @@
+A multiplayer-compatible mod enabling the in-game construction of maps in an editor sort of fashion
+
+Update:
+A key for enabling inventory-overwrite has been implemented.
+
+Notes:
+This is a slightly different version to the previous version on the Mod Browser. 
+There may or may not be new updates.
