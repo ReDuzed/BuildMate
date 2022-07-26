@@ -1,0 +1,15 @@
+A [soon to be multiplayer-compatible] mod enabling the in-game construction of maps in an editor sort of fashion
+
+Update:
+A key for enabling inventory-overwrite has been implemented.
+
+Changelog:
+# Added
+- Draw tile/wall texture near cursor
+- Copy/paste function
+- Full UI basics with item spawning
+- Tile copy schematics
+- Function categories
+
+Note:
+When the functions list is open, type an item name into chat to spawn that item.

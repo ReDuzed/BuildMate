@@ -1,8 +1,11 @@
-A multiplayer-compatible mod enabling the in-game construction of maps in an editor sort of fashion
+A multiplayer mod enabling the in-game construction of maps in an editor sort of fashion.
 
-Update:
-A key for enabling inventory-overwrite has been implemented.
+Tips
+* To use most of the features, holding the Ancient World Tool item is necessary.
+* There are three hotkeys.
+* Spawn items using the in-game chat while the functions list is open.
 
-Notes:
-This is a slightly different version to the previous version on the Mod Browser. 
-There may or may not be new updates.
+[RELEASE CANDIDATE 1]
+* [note] This release is to push a 1.4 compatible version out as well as attend to a couple changes.
+* [bug]  The save/load schematic feature does not load innactive tiles properly yet.
+* [note] Features working in multiplayer has been programmed in, but not thoroughly tested.

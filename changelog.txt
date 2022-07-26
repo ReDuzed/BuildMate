@@ -1,0 +1,30 @@
+version -> 2.0
+# Added
+- Draw tile/wall texture near cursor
+- Copy/paste function
+- Full UI basics with item spawning
+- Tile copy schematics
+- Function categories
+
+version 2.0 -> 2.0.1
+# Added
+- 2 hotkeys
+-> for opening menu and activating world edits
+- The tools menu is now moveable
+-> hold for 1/2 a second on the box to move
+
+version 2.0.1 -> 2.1.0.2
+# Added 
+- Item spawn prompt
+- Networking for v2 functions
+
+version 2.1.0.2 -> 2.2.1.3
+# Changed
+-> Menu now moves relative to mouse and stays in window bounds
+-> Font drawing using Utils
+# Fixed
+-> Copy tile buffer not placing non-solid tiles correctly
+-> Schematic file loading crash
+-> Item spawning
+# Notes
+-> Ported to 1.4

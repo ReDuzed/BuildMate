@@ -19,7 +19,16 @@ namespace BuildMate.Items
             proj = 0, projType = 0,
             tile = 0, tileType = 0,
             positionX1 = 1200, positionY1 = 1200, positionX2 = 1200, positionY2 = 1200;
-        public static string name = "Tile: n/a", toolTip = "Tool used to handle walls.";
+        public const string name = "Ancient World Tool", toolTip = "Tool used to handle tiles and walls.";
+        public static bool
+            mouseTexture = false,
+            tileItem = false;
+        public static Terraria.Tile[,] copyBuffer;
+        public static TileCopy[,] modCopyBuffer;
+        public string
+            toolInfo, toolName;
+        public static string
+            mainNewText;
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault(name);
@@ -27,20 +36,28 @@ namespace BuildMate.Items
         }
         public void ReassignDefaults(string name, string toolTip)
         {
-            DisplayName.SetDefault(name);
-            Tooltip.SetDefault(toolTip);
+            toolName = name;
+            toolInfo = toolTip;
         }
         public override void SetDefaults()
         {
-            item.width = 32;
-            item.height = 32;
+            Item.width = 48;
+            Item.height = 48;
+            Item.holdStyle = ItemHoldStyleID.HoldUp;
         }
-        public override bool UseItem(Player player)
+        public override void HoldItem(Player player)
         {
             if (player.whoAmI == Main.myPlayer)
             {
                 if (switchTime > 0)
                     switchTime--;
+                if (AI[player.whoAmI] < 8)
+                {
+                    positionX1 = 0;
+                    positionX2 = 0;
+                    positionY1 = 0;
+                    positionY2 = 0;
+                }
                 Vector2 mousev = new Vector2(Main.mouseX + Main.screenPosition.X, Main.mouseY + Main.screenPosition.Y);
                 switch (AI[player.whoAmI])
                 {
@@ -57,41 +74,46 @@ namespace BuildMate.Items
                             switchTime = 1;
                             Main.spawnTileX = (int)(Math.Round(mousev.X / 16));
                             Main.spawnTileY = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Spawn position set: X " + Math.Round(mousev.X / 16) + " Y " + Math.Round(mousev.Y / 16), 200, 150, 100);
+                            mainNewText = "Spawn position set: X " + Math.Round(mousev.X / 16) + " Y " + Math.Round(mousev.Y / 16);
                             //	if NetMessage necessary, it would be message 27		
-                            projType = mod.ProjectileType("Spawn");
-                            proj = Projectile.NewProjectile(mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
+                            projType = Mod.Find<ModProjectile>("Spawn").Type;
+                            proj = Projectile.NewProjectile(Projectile.GetSource_None(), mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
                             Main.projectile[proj].timeLeft = 120;
                         }
+                        mouseTexture = false;
                         break;
                     case 2:
                     //	tileManage 2, Tile Break
-                        projType = mod.ProjectileType("TileBreak");
+                        projType = Mod.Find<ModProjectile>("TileBreak").Type;
                         Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
                         if (Main.mouseLeft && globalTime % 4 == 0)
                         {
-                            proj = Projectile.NewProjectile(mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
+                            proj = Projectile.NewProjectile(Projectile.GetSource_None(), mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
                             Main.projectile[proj].timeLeft = 10;
                         }
+                        mouseTexture = false;
                         break;
                     case 3:
                     //	tileManage 3, Wall Break
-                        projType = mod.ProjectileType("WallBreak");
+                        projType = Mod.Find<ModProjectile>("WallBreak").Type;
                         Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
                         if (Main.mouseLeft && globalTime % 4 == 0)
                         {
-                            proj = Projectile.NewProjectile(mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
+                            proj = Projectile.NewProjectile(Projectile.GetSource_None(), mousev.X, mousev.Y, 0f, 0f, projType, 0, 0f, Main.myPlayer);
                             Main.projectile[proj].timeLeft = 10;
                         }
+                        mouseTexture = false;
                         break;
                     case 4:
                     //	tileManage 4, Tile Copy
                         Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
-                        if (Main.mouseRight && switchTime <= 0 && Main.tile[Player.tileTargetX, Player.tileTargetY] != null && Main.tile[Player.tileTargetX, Player.tileTargetY].active())
+                        if (Main.mouseRight && switchTime <= 0 && Main.tile[Player.tileTargetX, Player.tileTargetY] != null && Main.tile[Player.tileTargetX, Player.tileTargetY].HasTile)
                         {
                             switchTime = 1;
-                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].type;
+                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].TileType;
                             player.GetModPlayer<GUI>().tileType = "Tile ID Selected: " + tileType;
+                            mouseTexture = true;
+                            tileItem = true;
                         }
                         if (Main.mouseLeft && globalTime % 6 == 0)
                         {
@@ -106,8 +128,10 @@ namespace BuildMate.Items
                         if (Main.mouseRight && switchTime <= 0 && Main.tile[Player.tileTargetX, Player.tileTargetY] != null)
                         {
                             switchTime = 1;
-                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].wall;
+                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].WallType;
                             player.GetModPlayer<GUI>().wallType = "Wall ID Selected: " + tileType;
+                            mouseTexture = true;
+                            tileItem = false;
                         }
                         if (Main.mouseLeft && globalTime % 6 == 0)
                         {
@@ -120,7 +144,7 @@ namespace BuildMate.Items
                         Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
                         if (Main.mouseLeft && globalTime % 6 == 0)
                         {
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].liquid = 255;
+                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].LiquidAmount = 255;
                             WorldGen.SquareTileFrame((int)mousev.X / 16, (int)mousev.Y / 16, true);
                             if (Main.netMode != 0)
                             {
@@ -130,8 +154,9 @@ namespace BuildMate.Items
                         }
                         if (Main.mouseMiddle && globalTime % 6 == 0)
                         {
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].liquid = 255;
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].honey(true);
+                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].LiquidAmount = 255;
+                            var tile = Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16];
+                            tile.LiquidType = LiquidID.Honey;
                             WorldGen.SquareTileFrame((int)mousev.X / 16, (int)mousev.Y / 16, true);
                             if (Main.netMode != 0)
                             {
@@ -141,8 +166,9 @@ namespace BuildMate.Items
                         }
                         if (Main.mouseRight && globalTime % 6 == 0)
                         {
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].liquid = 255;
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].lava(true);
+                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].LiquidAmount = 255;
+                            var tile = Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16];
+                            tile.LiquidType = LiquidID.Lava;
                             WorldGen.SquareTileFrame((int)mousev.X / 16, (int)mousev.Y / 16, true);
                             if (Main.netMode != 0)
                             {
@@ -150,16 +176,18 @@ namespace BuildMate.Items
                                 NetMessage.sendWater((int)mousev.X / 16, (int)mousev.Y / 16);
                             }
                         }
+                        mouseTexture = false;
                         break;
                     case 7:
                     //	tileManage 7, Drain Liquid
                         Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
                         if (Main.mouseLeft)
                         {
-                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].liquid = 0;
+                            Main.tile[(int)mousev.X / 16, (int)mousev.Y / 16].LiquidAmount = 0;
                             WorldGen.SquareTileFrame((int)mousev.X / 16, (int)mousev.Y / 16, true);
                             if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, (int)(mousev.X / 16) - 1, (int)(mousev.Y / 16) - 1, 3);
                         }
+                        mouseTexture = true;
                         break;
                     case 8:
                     //	tileManage 8, Tile Selection Fill
@@ -169,23 +197,25 @@ namespace BuildMate.Items
                             switchTime = 1;
                             positionX1 = (int)(Math.Round(mousev.X / 16));
                             positionY1 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Corner 1 Set at: X " + positionX1 + " Y " + positionY1, 250, 225, 175);
+                            mainNewText = "Corner 1 Set at: X " + positionX1 + " Y " + positionY1;
                         }
                         if (Main.mouseRight && switchTime <= 0)
                         {
                             switchTime = 1;
                             positionX2 = (int)(Math.Round(mousev.X / 16));
                             positionY2 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Corner 2 Set at: X " + positionX2 + " Y " + positionY2, 250, 225, 175);
+                            mainNewText = "Corner 2 Set at: X " + positionX2 + " Y " + positionY2;
                         }
                         if (Main.mouseMiddle && switchTime <= 0 && Main.tile[Player.tileTargetX, Player.tileTargetY] != null)
                         {
                             switchTime = 1;
-                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].type;
-                            Main.NewText("Tile ID Selected: " + tileType, 200, 150, 100);
+                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].TileType;
+                            mainNewText = "Tile ID Selected: " + tileType;
+                            mouseTexture = true;
+                            tileItem = true;
                         }
                     //  TODO CLICK "Fill All" button
-                        //if (Main.GetKeyState((int)Microsoft.Xna.Framework.Input.Keys.X) < 0)
+                        //if (BuildMate.hotkey[1].JustPressed)
                         //{
                         //    for (int i = positionX1; i < positionX2; i++)
                         //    {
@@ -202,7 +232,7 @@ namespace BuildMate.Items
                         //    }
                         //}
                     //  TODO CLICK "Fill Empty" button
-                        if (Main.GetKeyState((int)Microsoft.Xna.Framework.Input.Keys.X) < 0)
+                        if (BuildMate.hotkey[1].JustPressed)
                         {
                             for (int i = positionX1; i < positionX2; i++)
                             {
@@ -227,17 +257,17 @@ namespace BuildMate.Items
                             switchTime = 1;
                             positionX1 = (int)(Math.Round(mousev.X / 16));
                             positionY1 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Corner 1 Set at: X " + positionX1 + " Y " + positionY1, 250, 225, 175);
+                            mainNewText = "Corner 1 Set at: X " + positionX1 + " Y " + positionY1;
                         }
                         if (Main.mouseRight && switchTime <= 0)
                         {
                             switchTime = 1;
                             positionX2 = (int)(Math.Round(mousev.X / 16));
                             positionY2 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Corner 2 Set at: X " + positionX2 + " Y " + positionY2, 250, 225, 175);
+                            mainNewText = "Corner 2 Set at: X " + positionX2 + " Y " + positionY2;
                         }
                     //  TODO CLICK "Clear tiles"
-                        if (Main.GetKeyState((int)Microsoft.Xna.Framework.Input.Keys.X) < 0)
+                        if (BuildMate.hotkey[1].JustPressed)
                         {
                             for (int i = positionX1; i < positionX2; i++)
                             {
@@ -253,6 +283,7 @@ namespace BuildMate.Items
                             positionY1 = 0;
                             positionY2 = 0;
                         }
+                        mouseTexture = false;
                         break;
                     case 10:
                     //	tileManage 10, Wall Selection Fill
@@ -262,22 +293,24 @@ namespace BuildMate.Items
                             switchTime = 1;
                             positionX1 = (int)(Math.Round(mousev.X / 16));
                             positionY1 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Top Left Corner Set at: X " + positionX1 + " Y " + positionY1, 250, 225, 175);
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
                         }
                         if (Main.mouseRight && switchTime <= 0)
                         {
                             switchTime = 1;
                             positionX2 = (int)(Math.Round(mousev.X / 16));
                             positionY2 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2, 250, 225, 175);
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
                         }
                         if (Main.mouseMiddle && switchTime <= 0 && Main.tile[Player.tileTargetX, Player.tileTargetY] != null)
                         {
                             switchTime = 1;
-                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].wall;
-                            Main.NewText("Wall ID Selected: " + tileType, 200, 150, 100);
+                            tileType = Main.tile[Player.tileTargetX, Player.tileTargetY].WallType;
+                            mainNewText = "Wall ID Selected: " + tileType;
+                            mouseTexture = true;
+                            tileItem = false;
                         }
-                        if (Main.GetKeyState((int)Microsoft.Xna.Framework.Input.Keys.X) < 0)
+                        if (BuildMate.hotkey[1].JustPressed)
                         {
                             for (int i = positionX1; i < positionX2; i++)
                             {
@@ -297,16 +330,16 @@ namespace BuildMate.Items
                             switchTime = 1;
                             positionX1 = (int)(Math.Round(mousev.X / 16));
                             positionY1 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Top Left Corner Set at: X " + positionX1 + " Y " + positionY1, 250, 225, 175);
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
                         }
                         if (Main.mouseRight && switchTime <= 0)
                         {
                             switchTime = 1;
                             positionX2 = (int)(Math.Round(mousev.X / 16));
                             positionY2 = (int)(Math.Round(mousev.Y / 16));
-                            Main.NewText("Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2, 250, 225, 175);
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
                         }
-                        if (Main.GetKeyState((int)Microsoft.Xna.Framework.Input.Keys.X) < 0)
+                        if (BuildMate.hotkey[1].JustPressed)
                         {
                             for (int i = positionX1; i < positionX2; i++)
                             {
@@ -318,12 +351,256 @@ namespace BuildMate.Items
                                 }
                             }
                         }
+                        mouseTexture = false;
+                        break;
+                    case 12:
+                    //  tileManage 12, Tile Selection Copy
+                        Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
+                        if (Main.mouseLeft && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX1 = (int)(Math.Round(mousev.X / 16));
+                            positionY1 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
+                        }
+                        if (Main.mouseRight && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX2 = (int)(Math.Round(mousev.X / 16));
+                            positionY2 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
+                        }
+                        if (Main.mouseMiddle && switchTime <= 0)
+                        {
+                            if (positionX1 == 0 || positionX2 == 0 || positionY1 == 0 || positionY2 == 0)
+                                break;
+                            int x = Math.Min(positionX1, positionX2);
+                            int y = Math.Min(positionY1, positionY2);
+                            int width = Math.Abs(positionX2 - positionX1);
+                            int height = Math.Abs(positionY2 - positionY1);
+                            copyBuffer = new Terraria.Tile[width, height];
+                            for (int i = x; i < x + width; i++)
+                            {
+                                for (int j = y; j < y + height; j++)
+                                {
+                                    if (Main.tile[i, j].HasTile)
+                                    {
+                                        copyBuffer[i - x, j - y] = Main.tile[i, j];
+                                    }
+                                }
+                            }
+                            mainNewText = string.Format("{0} tiles copied!", width * height);
+                            positionX1 = 0;
+                            positionX2 = 0;
+                            positionY1 = 0;
+                            positionY2 = 0;
+                        }
+                        if (BuildMate.hotkey[1].JustPressed)
+                        {
+                            if (copyBuffer != null && copyBuffer.Length > 0)
+                            {
+                                mousev = new Vector2(Player.tileTargetX, Player.tileTargetY);
+                                for (int i = copyBuffer.GetLength(0) - 1; i >= 0 ; i--)
+                                {
+                                    for (int j = copyBuffer.GetLength(1) - 1; j >= 0 ; j--)
+                                    {
+                                        if (copyBuffer[i, j] != null)
+                                        {
+                                            WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].TileType, true, true);
+                                            if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 3);
+                                        }
+                                    }
+                                }
+                                copyBuffer = null;
+                            }
+                        }
+                        mouseTexture = false;
+                        break;
+                    case 13: 
+                    //  tileManage 13, Wall Selection Copy
+                        Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
+                        if (Main.mouseLeft && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX1 = (int)(Math.Round(mousev.X / 16));
+                            positionY1 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
+                        }
+                        if (Main.mouseRight && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX2 = (int)(Math.Round(mousev.X / 16));
+                            positionY2 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
+                        }
+                        if (Main.mouseMiddle && switchTime <= 0)
+                        {
+                            if (positionX1 == 0 || positionX2 == 0 || positionY1 == 0 || positionY2 == 0)
+                                break;
+                            int x = Math.Min(positionX1, positionX2);
+                            int y = Math.Min(positionY1, positionY2);
+                            int width = Math.Abs(positionX2 - positionX1);
+                            int height = Math.Abs(positionY2 - positionY1);
+                            copyBuffer = new Terraria.Tile[width, height];
+                            for (int i = x; i < x + width; i++)
+                            {
+                                for (int j = y; j < y + height; j++)
+                                {
+                                    if (Main.tile[i, j].HasTile)
+                                    {
+                                        copyBuffer[i - x, j - y] = Main.tile[i, j];
+                                    }
+                                }
+                            }
+                            mainNewText = string.Format("{0} walls copied!", width * height);
+                            positionX1 = 0;
+                            positionX2 = 0;
+                            positionY1 = 0;
+                            positionY2 = 0;
+                        }
+                        if (BuildMate.hotkey[1].JustPressed)
+                        {
+                            if (copyBuffer != null && copyBuffer.Length > 0)
+                            {
+                                mousev = new Vector2(Player.tileTargetX, Player.tileTargetY);
+                                for (int i = copyBuffer.GetLength(0) - 1; i >= 0; i--)
+                                {
+                                    for (int j = copyBuffer.GetLength(1) - 1; j >= 0; j--)
+                                    {
+                                        if (copyBuffer[i, j] != null)
+                                        {
+                                            WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].WallType, true);
+                                            if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 3);
+                                        }
+                                    }
+                                }
+                                copyBuffer = null;
+                            }
+                        }
+                        mouseTexture = false;
+                        break;
+                    case 14:
+                        if (Main.chatText.Length > 0 || GUI.saveBox.text.Length > 0)
+                            return;
+                    //  tileManage 14, Tile & Wall Selection Copy
+                        Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
+                        if (Main.mouseLeft && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX1 = (int)(Math.Round(mousev.X / 16));
+                            positionY1 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
+                        }
+                        if (Main.mouseRight && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX2 = (int)(Math.Round(mousev.X / 16));
+                            positionY2 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
+                        }
+                        if (Main.mouseMiddle && switchTime <= 0)
+                        {
+                            if (positionX1 == 0 || positionX2 == 0 || positionY1 == 0 || positionY2 == 0)
+                                break;
+                            int x = Math.Min(positionX1, positionX2);
+                            int y = Math.Min(positionY1, positionY2);
+                            int width = Math.Abs(positionX2 - positionX1);
+                            int height = Math.Abs(positionY2 - positionY1);
+                            copyBuffer = new Terraria.Tile[width, height];
+                            for (int i = x; i < x + width; i++)
+                            {
+                                for (int j = y; j < y + height; j++)
+                                {
+                                    copyBuffer[i - x, j - y] = Main.tile[i, j];
+                                    copyBuffer[i - x, j - y].HasTile = Main.tile[i, j].HasTile;
+                                    copyBuffer[i - x, j - y].Slope = Main.tile[i, j].Slope;
+                                    copyBuffer[i - x, j - y].IsHalfBlock = Main.tile[i, j].IsHalfBlock;
+                                }
+                            }
+                            mainNewText = string.Format("{0} walls copied!", width * height);
+                            positionX1 = 0;
+                            positionX2 = 0;
+                            positionY1 = 0;
+                            positionY2 = 0;
+                        }
+                        if (BuildMate.hotkey[1].JustPressed)
+                        {
+                            if (copyBuffer != null && copyBuffer.Length > 0)
+                            {
+                                mousev = new Vector2(Player.tileTargetX, Player.tileTargetY);
+                                for (int i = copyBuffer.GetLength(0) - 1; i >= 0; i--)
+                                {
+                                    for (int j = copyBuffer.GetLength(1) - 1; j >= 0; j--)
+                                    {
+                                        if (copyBuffer[i, j] != null && copyBuffer[i, j].HasTile)
+                                        {
+                                            if (modCopyBuffer != null && modCopyBuffer.GetLength(0) == copyBuffer.GetLength(0) && modCopyBuffer.GetLength(1) == copyBuffer.GetLength(1) && modCopyBuffer[i, j] != null && !modCopyBuffer[i, j].active)
+                                                continue;
+                                            if (modCopyBuffer == null)
+                                            { 
+                                                WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].WallType, true);
+                                                WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].TileType, true, true);
+                                                WorldGen.SlopeTile((int)mousev.X + i, (int)mousev.Y + j, (int)copyBuffer[i, j].Slope, true);
+                                                var tile = Main.tile[(int)mousev.X + i, (int)mousev.Y + j];
+                                                tile.IsHalfBlock = copyBuffer[i, j].IsHalfBlock;
+                                            }
+                                            else if (modCopyBuffer.GetLength(0) == copyBuffer.GetLength(0) && modCopyBuffer[i, j].active)
+                                            {
+                                                WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].wall, true);
+                                                WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].type, true, true);
+                                                WorldGen.SlopeTile((int)mousev.X + i, (int)mousev.Y + j, (int)modCopyBuffer[i, j].slope, true);
+                                                var a = new Terraria.WorldBuilding.Actions.SetHalfTile(modCopyBuffer[i, j].halfBlock);
+                                                a.Apply(new Point((int)mousev.X + i, (int)mousev.Y + j + 1), (int)mousev.X + i, (int)mousev.Y + j + 1, null);
+                                                //var tile = Main.tile[(int)mousev.X + i, (int)mousev.Y + j];
+                                                //tile.IsHalfBlock = modCopyBuffer[i, j].halfBlock;
+                                            }
+                                            WorldGen.SquareTileFrame(i, j);
+                                            if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, (int)mousev.X + i - 1, (int)mousev.Y + j - 1, 3);
+                                        }
+                                    }
+                                }
+                                modCopyBuffer = null;
+                                copyBuffer = null;
+                            }
+                        }
+                        mouseTexture = false;
+                        break;
+                    case 15:
+                    //	tileManage 15, Tile & Wall Selection Remove
+                        Lighting.AddLight((int)(mousev.X / 16), (int)(mousev.Y / 16), 1f, 1f, 1f);
+                        if (Main.mouseLeft && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX1 = (int)(Math.Round(mousev.X / 16));
+                            positionY1 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Top Left Corner Set at: X " + positionX1 + " Y " + positionY1;
+                        }
+                        if (Main.mouseRight && switchTime <= 0)
+                        {
+                            switchTime = 1;
+                            positionX2 = (int)(Math.Round(mousev.X / 16));
+                            positionY2 = (int)(Math.Round(mousev.Y / 16));
+                            mainNewText = "Bottom Right Corner Set at: X " + positionX2 + " Y " + positionY2;
+                        }
+                        if (BuildMate.hotkey[1].JustPressed)
+                        {
+                            for (int i = positionX1; i < positionX2; i++)
+                            {
+                                for (int j = positionY1; j < positionY2; j++)
+                                {
+                                    WorldGen.KillTile(i, j, false, false, true);
+                                    WorldGen.KillWall(i, j, false);
+                                    WorldGen.SquareTileFrame(i, j);
+                                    if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 3);
+                                }
+                            }
+                        }
+                        mouseTexture = false;
                         break;
                     default:
                         break;
                 }
             }
-            return true;
         }
     }
 }

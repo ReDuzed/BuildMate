@@ -1,0 +1,26 @@
+Magno worldgen last push
+-> worldgen helper
+-> plants
+-> magno houses
+-> Lerp pathways
+License for Archaea Mod
+Release Archaea Mod
+Barrier between Magno and underworld
+
+Changelog
+# Added
+- Magno ash
+- 2 magno plants
+-> small and large
+- Placeable Cinnabar crystal tile
+
+# Changed
+- Magno stone texture
+- Magno wall texture
+- Revised Magno generation
+-> from MINER generation to GenMapViewer
+- Replaced cave backgrounds with newest versions
+
+#3
+Look up From: Terror "ash" for magno future
+

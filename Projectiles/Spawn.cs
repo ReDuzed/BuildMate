@@ -15,22 +15,22 @@ namespace BuildMate.Projectiles
 		}
 		public override void SetDefaults()
 		{
-			projectile.width = 1;
-			projectile.height = 1;
-			projectile.aiStyle = 0;
-			projectile.timeLeft = 120;
-			projectile.friendly = true;
-			projectile.penetrate = 1;
-			projectile.tileCollide = false;
-			projectile.ignoreWater = true;
-			projectile.scale = 1f;
-			projectile.ownerHitCheck = true;
-			projectile.netUpdate = true;
+			Projectile.width = 1;
+			Projectile.height = 1;
+			Projectile.aiStyle = 0;
+			Projectile.timeLeft = 120;
+			Projectile.friendly = true;
+			Projectile.penetrate = 1;
+			Projectile.tileCollide = false;
+			Projectile.ignoreWater = true;
+			Projectile.scale = 1f;
+			Projectile.ownerHitCheck = true;
+			Projectile.netUpdate = true;
 		}
 	#endregion
 		public override void AI()
 		{
-			Lighting.AddLight((int)projectile.position.X/16, (int)projectile.position.Y/16, 1f, 1f, 1f);
+			Lighting.AddLight((int)Projectile.position.X/16, (int)Projectile.position.Y/16, 1f, 1f, 1f);
 		}
 	}
 }

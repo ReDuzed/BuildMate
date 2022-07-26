@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
-
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
@@ -11,12 +11,17 @@ namespace BuildMate
 {
 	public class BuildMate : Mod
 	{
-		public void SetModInfo(out string name, ref ModProperties properties)
-		{
-			name = "Build Mate";
-			properties.Autoload = true;
-			properties.AutoloadGores = true;
-			properties.AutoloadSounds = true;
+		public static ModKeybind[] hotkey = new ModKeybind[3];
+        public override void Load()
+        {
+			hotkey[0] = KeybindLoader.RegisterKeybind(this, "Open world edit menu", "O");
+			hotkey[1] = KeybindLoader.RegisterKeybind(this, "World edit command", "X");
+            hotkey[2] = KeybindLoader.RegisterKeybind(this, "Clear selection", Keys.Tab);
 		}
-	}
+        public override void Unload()
+        {
+			GlobalWorld.menuX = 125;
+			GlobalWorld.menuY = 75;
+        }
+    }
 }

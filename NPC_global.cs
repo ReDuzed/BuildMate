@@ -10,7 +10,7 @@ namespace BuildMate
 	{
 		public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns)
 		{
-			if(GlobalPlayer.enabled) {
+			if (GlobalWorld.enabled) {
 					spawnRate = 0;
 					maxSpawns = 0;
 			}
