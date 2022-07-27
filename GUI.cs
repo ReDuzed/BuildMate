@@ -199,7 +199,7 @@ namespace BuildMate
                                         var tile = Items.Tile.copyBuffer[i, j];
                                         if (tile != null)
                                         {                                                                                                     
-                                            sw.WriteLine(string.Format("{0} {1} {2} {3} {4} {5},", string.Concat(i, ":", j), tile.TileType, tile.Slope, tile.WallType, tile.HasTile, tile.IsHalfBlock));
+                                            sw.WriteLine(string.Format("{0} {1} {2} {3} {4} {5}", string.Concat(i, ":", j), tile.TileType, tile.Slope, tile.WallType, tile.HasTile, tile.IsHalfBlock));
                                         }
                                     }
                                 }
@@ -235,13 +235,14 @@ namespace BuildMate
                                     bool.TryParse(line[4], out bool active);
                                     bool.TryParse(line[5], out bool halfBlock);
 
-                                    var tile = new Terraria.Tile();
-                                    tile.TileType = type;
-                                    tile.Slope = (SlopeType)slope;
-                                    tile.WallType = wall;
-                                    tile.HasTile = active;
-                                    tile.IsHalfBlock = halfBlock;
-                                    Items.Tile.copyBuffer[i, j] = tile;
+                                    //  Index of tile (0, 0), using a custom class instead
+                                    //var tile = new Terraria.Tile();
+                                    //tile.TileType = type;
+                                    //tile.Slope = (SlopeType)slope;
+                                    //tile.WallType = wall;
+                                    //tile.HasTile = active;
+                                    //tile.IsHalfBlock = halfBlock;
+                                    //Items.Tile.copyBuffer[i, j] = tile;
                                     Items.Tile.modCopyBuffer[i, j] = new TileCopy()
                                     {
                                         active = active,

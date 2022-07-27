@@ -7,5 +7,4 @@ Tips
 
 [RELEASE CANDIDATE 1]
 * [note] This release is to push a 1.4 compatible version out as well as attend to a couple changes.
-* [bug]  The save/load schematic feature does not load innactive tiles properly yet.
 * [note] Features working in multiplayer has been programmed in, but not thoroughly tested.

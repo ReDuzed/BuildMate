@@ -43,6 +43,8 @@ namespace BuildMate
         }
         public override void PostDrawTiles()
         {
+            if (Main.dedServ)
+                return;
             var player = Main.LocalPlayer;
             Interact.sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             if (draw)

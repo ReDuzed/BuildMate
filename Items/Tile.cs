@@ -532,31 +532,31 @@ namespace BuildMate.Items
                                 {
                                     for (int j = copyBuffer.GetLength(1) - 1; j >= 0; j--)
                                     {
-                                        if (copyBuffer[i, j] != null && copyBuffer[i, j].HasTile)
+                                        if (modCopyBuffer != null && modCopyBuffer.GetLength(0) == copyBuffer.GetLength(0) && modCopyBuffer.GetLength(1) == copyBuffer.GetLength(1) && modCopyBuffer[i, j] != null && !modCopyBuffer[i, j].active)
+                                            continue;
+                                        if (modCopyBuffer == null)
                                         {
-                                            if (modCopyBuffer != null && modCopyBuffer.GetLength(0) == copyBuffer.GetLength(0) && modCopyBuffer.GetLength(1) == copyBuffer.GetLength(1) && modCopyBuffer[i, j] != null && !modCopyBuffer[i, j].active)
-                                                continue;
-                                            if (modCopyBuffer == null)
-                                            { 
+                                            if (copyBuffer[i, j].HasTile)
+                                            {
                                                 WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].WallType, true);
                                                 WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, copyBuffer[i, j].TileType, true, true);
                                                 WorldGen.SlopeTile((int)mousev.X + i, (int)mousev.Y + j, (int)copyBuffer[i, j].Slope, true);
                                                 var tile = Main.tile[(int)mousev.X + i, (int)mousev.Y + j];
                                                 tile.IsHalfBlock = copyBuffer[i, j].IsHalfBlock;
                                             }
-                                            else if (modCopyBuffer.GetLength(0) == copyBuffer.GetLength(0) && modCopyBuffer[i, j].active)
-                                            {
-                                                WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].wall, true);
-                                                WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].type, true, true);
-                                                WorldGen.SlopeTile((int)mousev.X + i, (int)mousev.Y + j, (int)modCopyBuffer[i, j].slope, true);
-                                                var a = new Terraria.WorldBuilding.Actions.SetHalfTile(modCopyBuffer[i, j].halfBlock);
-                                                a.Apply(new Point((int)mousev.X + i, (int)mousev.Y + j + 1), (int)mousev.X + i, (int)mousev.Y + j + 1, null);
-                                                //var tile = Main.tile[(int)mousev.X + i, (int)mousev.Y + j];
-                                                //tile.IsHalfBlock = modCopyBuffer[i, j].halfBlock;
-                                            }
-                                            WorldGen.SquareTileFrame(i, j);
-                                            if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, (int)mousev.X + i - 1, (int)mousev.Y + j - 1, 3);
                                         }
+                                        else
+                                        {
+                                            WorldGen.PlaceWall((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].wall, true);
+                                            WorldGen.PlaceTile((int)mousev.X + i, (int)mousev.Y + j, modCopyBuffer[i, j].type, true, true);
+                                            WorldGen.SlopeTile((int)mousev.X + i, (int)mousev.Y + j, (int)modCopyBuffer[i, j].slope, true);
+                                            var a = new Terraria.WorldBuilding.Actions.SetHalfTile(modCopyBuffer[i, j].halfBlock);
+                                            a.Apply(new Point((int)mousev.X + i, (int)mousev.Y + j), (int)mousev.X + i, (int)mousev.Y + j, null);
+                                            //var tile = Main.tile[(int)mousev.X + i, (int)mousev.Y + j];
+                                            //tile.IsHalfBlock = modCopyBuffer[i, j].halfBlock;
+                                        }
+                                        WorldGen.SquareTileFrame(i, j);
+                                        if (Main.netMode != 0) NetMessage.SendTileSquare(Main.myPlayer, (int)mousev.X + i - 1, (int)mousev.Y + j - 1, 3);
                                     }
                                 }
                                 modCopyBuffer = null;
